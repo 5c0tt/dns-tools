@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# slaveChecer 07/31/2010 11:21:09 AM
+# scott@newgeo.com
+
+# Runs through a list of domains in a text file, testing those domains to see
+# if they are slaved by ns1.hostwizard.com or not.  A log is made that lists
+# each domain with a PASS or FAIL status.  Those with FAIL status means that the
+# owner of the primary has removed the domain from their system.  They did not
+# notify the slave, so there is a so called "lame server" happening.
+
+echo Started test on: `date`
+echo
+
+RESULTS_FILE=results.txt # Name of results file
+echo Started test on: `date` > $RESULTS_FILE # Clear the RESULTS_FILE, stamp it with a date
+echo "" >> $RESULTS_FILE # Add a return to the file
+
+# Read in the domains file, this is a list of domains, \n separated
+DOMAINS=`cat dns.txt`
+
+# Iterate over the domains, and check for my NS in the SOA
+for DOMAIN in $DOMAINS
+do
+    echo Testing: $DOMAIN
+
+    # DIGRESULT is a basic dns lookup returning all SOA records
+    DIGRESULT=`dig $DOMAIN +nssearch`
+    echo $DIGRESULT
+
+    # Filter the DIGRESULT looking for my specific NS, if it is there,
+    # it would be safe to assume I should be slaving it
+    SEARCHRESULT=`echo $DIGRESULT | grep -ioE ns1\.hostwizard\.com`
+
+    # Convert the SEARCHRESULT to lowercase as a precaution
+    SEARCHRESULT=`echo $SEARCHRESULT | awk '{print tolower($0)}'`
+
+    # Compare the SEARCHRESULT against my DNS NS string for equality
+    if [[ $SEARCHRESULT == 'ns1.hostwizard.com' ]]; then
+        echo PASS: $DOMAIN is slaved by $SEARCHRESULT
+        echo "PASS $DOMAIN" >> $RESULTS_FILE
+    else
+        echo FAIL: $DOMAIN is not slaved by $SEARCHRESULT
+        echo "FAIL $DOMAIN" >> $RESULTS_FILE
+    fi
+
+    echo
+done
+
+
+
+
+

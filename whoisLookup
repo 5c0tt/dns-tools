@@ -1,0 +1,47 @@
+ #!/bin/bash
+
+# Script to test if correct NS's are listed in the whois
+# Usage is scriptname /path/to/domains primary secondary
+if [ "$1" = "" ]; then
+    echo "You need to give a path to a return seperated domains file"
+    echo " Usage is scriptname /path/to/domains primary-NS secondary-NS"
+    exit 0
+fi
+
+if [ "$2" = "" ]; then
+    echo "Please supply your first DNS server"
+    echo " Usage is scriptname /path/to/domains primary-NS secondary-NS"
+    exit 0
+fi
+
+if [ "$3" = "" ]; then
+    echo "Please supply your second DNS server"
+    echo " Usage is scriptname /path/to/domains primary-NS secondary-NS"
+    exit 0
+fi
+
+
+DOMAINS=`cat "$1"`
+for domain in $DOMAINS
+do
+    # Check the first NS in the whois
+    result=`dig $domain NS +trace -4 @4.2.2.1 | grep $2`
+    if [ "$result" = "" ]; then
+        echo $domain is missing $2
+    else
+        echo ------- $2 found in $domain
+    fi
+
+    # Check the second NS in the whois
+    result=`dig $domain NS +trace -4 @4.2.2.1 | grep $3`
+    if [ "$result" = "" ]; then
+        echo $domain is missing $3
+    else
+        echo ------- $3 found in $domain
+    fi
+
+    # Shove in a return to make it easier to read
+    echo ""
+done
+
+exit 0

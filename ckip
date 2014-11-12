@@ -1,0 +1,82 @@
+#!/bin/bash
+# 04/29/2010 06:55:45 PM Scott Haneda <scott@newgeo.com>
+# Version 0.1.1
+# ckip is a commmand line tool, given an IP, it will look up that IP in DNSBLs and DNSWL's
+# and do other basic tests to help determine if the IP is spammy or not
+
+IP=$1 # Convert the first passed in ARG to VAR of IP
+if [[ $IP == "" ]]; then
+     echo "You must enter in an argument, such as an IP address in non reversed form: eg ./ckip 127.0.0.1"
+     exit 1
+fi
+
+echo "Testing IP: $IP"
+echo
+
+# Split the IP into parts, in order to get the reversed IP
+A=`echo $IP | cut -d\. -f1`; B=`echo $IP | cut -d\. -f2`; C=`echo $IP | cut -d\. -f3`; D=`echo $IP | cut -d\. -f4`;
+REVERSED=$D.$C.$B.$A
+
+echo "Reversed IP..."
+echo "     $REVERSED"
+echo
+
+# Start poking into my DNSBLs and DNSWLs
+# First we need a list of the places I am going to check (Return sep'd list)
+DNSLISTS="b.barracudacentral.org
+query.bondedsender.org
+hul.habeas.com
+iadb.isipp.com
+resl.emailreg.org
+bl.spamcop.net
+zen.spamhaus.org
+cbl.abuseat.org
+blacklist.jippg.org
+combined.njabl.org
+dnsbl.sorbs.net
+hil.habeas.com
+bogons.cymru.com
+psbl.surriel.com
+ubl.unsubscore.com
+bl.emailbasura.org
+blackholes.five-ten-sg.com"
+
+rm -f /tmp/dnsresults # Trash the old file I use for storing the DNS hits
+
+for DNSHOST in $DNSLISTS; do
+	echo "Checking $REVERSED in $DNSHOST..."
+	CMD=`dig $REVERSED.$DNSHOST +short`
+	if [[ -z $CMD ]]; then
+		# echo "    --No Match Found.";
+		echo -n
+	else
+		echo "    ++$CMD"
+		echo "    $DNSHOST" >> /tmp/dnsresults
+	fi
+	echo
+done;
+
+echo "=== RESULTS `date` ==="
+echo
+
+echo " == DNSBL / DNSWL =="
+if [ -f /tmp/dnsresults ]; then
+     echo " $IP is listed in the following DNSBLs or DNSWLs"
+     cat /tmp/dnsresults
+     rm -f /tmp/dnsresults
+else
+     echo " $IP is clean and not listed in any DNSBLs or DNSWLs"
+fi
+echo
+
+echo "== Reverse DNS =="
+echo " Getting reverse PTR..."
+echo "     `dig -x $IP +short @ns1.hostwizard.com`"
+echo
+
+echo "== HTTP Server Checking ( curl the IP at port 80 ) =="
+# Is http port 80 open?
+echo " Testing port 80..."
+echo "    1) http://$IP"
+echo "    2) `curl --silent --head --connect-timeout 3 $IP | awk '{ print "    "$0}'`"
+echo

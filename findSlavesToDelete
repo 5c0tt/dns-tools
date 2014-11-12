@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Script to test for slaves that have no masters anymore
+# Usage is scriptname /path/to/domains server
+if [ "$1" = "" ]; then
+    echo "You need to give a path to a return seperated domains file"
+    echo " Usage is scriptname /path/to/domains primary-NS"
+    exit 0
+fi
+
+if [ "$2" = "" ]; then
+    echo "Please supply a primary-NS"
+    echo " Usage is scriptname /path/to/domains primary-NS"
+    exit 0
+fi
+
+echo "The following domains can be deleted at $2"
+DOMAINS=`cat "$1"`
+for domain in $DOMAINS
+do
+    result=`dig ns +norecurse @"$2" $domain | grep -i 'ANSWER:\ 0'`
+    if [ "$result" != "" ]; then
+        echo $domain is OK to be deleted from slave on $2
+    fi
+done
+exit 0
