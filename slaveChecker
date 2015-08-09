@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # slaveChecer 07/31/2010 11:21:09 AM
-# scott@newgeo.com
+# Scott Haneda @scotthaneda
 
 # Runs through a list of domains in a text file, testing those domains to see
 # if they are slaved by ns1.hostwizard.com or not.  A log is made that lists

@@ -1,5 +1,6 @@
 #!/bin/bash
-# 04/29/2010 06:55:45 PM Scott Haneda <scott@newgeo.com>
+# 04/29/2010 06:55:45 PM
+# Scott Haneda @scotthaneda
 # Version 0.1.1
 # ckip is a commmand line tool, given an IP, it will look up that IP in DNSBLs and DNSWL's
 # and do other basic tests to help determine if the IP is spammy or not
