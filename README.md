@@ -1,5 +1,5 @@
-11/11/14 - 11:18:10 P.M.
-scott@newgeo.com • @cometbus
+11/11/14 - 11:18:10 P.M.  
+Scott Haneda [@scotthaneda](https://twitter.com/scotthaneda)
 
 #DNS Tools
 When you run secondary DNS for others, if they add or delete a DNS zone, the first time these actions happen, changes to the primary have to be made.
